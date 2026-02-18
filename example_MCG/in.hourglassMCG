@@ -3,7 +3,7 @@ atom_style	granular
 atom_modify	map array
 boundary	f p f
 newton		off
-processors   	2 2 2
+#processors   	2 2 2
 communicate	single vel yes
 echo            both
 #modify_timing	on
@@ -32,17 +32,19 @@ pair_style  gran model hertz tangential history rolling_friction cdt limitForce 
 pair_coeff	* *
 
 timestep    1e-5
-fix         GRAVITY all gravity 9.81 vector 0 -1 0
+#fix         GRAVITY all gravity 9.81 vector 0 -1 0
 
 #granular walls
 
-#fix             inface all mesh/surface/planar file mesh/infaceBulk.stl type 2
-#fix 		ywalls1 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 yplane 0
+fix             inface all mesh/surface/planar file mesh/infaceBulk.stl type 2 move 0 -0.7 0
+fix 		ywalls1 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 yplane 0
+fix 		ywalls2 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 yplane 0.4
 fix 		xwalls1 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 xplane -0.15
 fix 		xwalls2 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 xplane 0.15
 fix 		zwalls1 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 zplane -0.15
 fix 		zwalls2 all wall/gran model hertz tangential history rolling_friction cdt primitive type 2 zplane 0.15
 
+fix 		base all wall/gran model hertz tangential history rolling_friction cdt mesh n_meshes 1 meshes inface
 
 #distributions for insertion
 fix		pts1 all particletemplate/sphere 1295377 atom_type 1 density constant 2000 radius constant 0.0025
@@ -56,8 +58,7 @@ fix		integrator all nve/sphere
 
 region		insregion block -0.15 0.15 0.25 0.4 -0.15 0.15  units box
 fix             ins all insert/pack seed 123457 distributiontemplate pdd1 insert_every once overlapcheck yes &
-                vel constant 0 -0.001 0 particles_in_region 400 region insregion ntry_mc 10000
-
+                vel constant 0 -1 0 particles_in_region 400 region insregion ntry_mc 10000
 
 fix             MCG_ all mcg
 
@@ -71,5 +72,5 @@ thermo_modify	lost ignore norm no
 #run			1
 dump		dmp all custom/vtk 1000 post/hopper_*.vtk id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius density
 
-run             2000000 upto
+run             500000 upto
 
